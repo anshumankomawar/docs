@@ -6,6 +6,7 @@ export default defineNuxtConfig({
 		"shadcn-nuxt",
 		"nuxt-vuefire",
 		"@nuxtjs/color-mode",
+		"@pinia/nuxt",
 	],
 	shadcn: {
 		/**
@@ -36,5 +37,7 @@ export default defineNuxtConfig({
 	colorMode: {
 		classSuffix: "",
 	},
+	pinia: {
+		storesDirs: ["./stores/**"],
+	},
 });
-

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { PlusCircledIcon, CalendarIcon, MagnifyingGlassIcon, BackpackIcon, HomeIcon, PersonIcon, CaretDownIcon, PlusIcon, PieChartIcon, RocketIcon, Pencil1Icon, FigmaLogoIcon, ArchiveIcon, GearIcon, QuestionMarkCircledIcon, MoonIcon } from '@radix-icons/vue';
+import { UserIcon, CalendarDaysIcon, DocumentDuplicateIcon, DocumentPlusIcon, FolderPlusIcon, MagnifyingGlassIcon, FolderIcon, ArchiveBoxIcon, TrashIcon, Cog6ToothIcon, QuestionMarkCircleIcon, MoonIcon } from '@heroicons/vue/24/outline'
 const accounts = [
   {
-    label: 'Alicia Koch',
+    label: 'Personal',
     email: 'alicia@example.com',
     icon: 'ion:logo-vercel',
   },
@@ -19,44 +19,61 @@ const accounts = [
 ]
 
 const isCollapsed = ref(false)
-const isOpen1 = ref(false)
-const isOpen = ref(false)
-
+const openNewFilePanel = ref(false)
+const openNewFolderPanel = ref(false)
 const colorMode = useColorMode()
+
+function handleFolderClick(path: string) {
+  navigateTo(`/${path}`)
+}
 </script>
 
 <template>
-  <div class="w-[200px] flex-none mr-4 flex flex-col h-full overflow-none">
-    <div class="pb-4">
+  <div class="w-[200px] flex-none flex flex-col h-full overflow-none">
+    <div class="pb-2">
       <SidebarSwitcher :is-collapsed="isCollapsed" :accounts="accounts" />
     </div>
-    <Button variant="ghost" size="xs" class="h-8 mb-1 rounded-md">
+    <Sheet v-model:open="openNewFilePanel">
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="xs" class="rounded-md">
+          <div class="flex flex-row items-center justify-start w-full">
+            <DocumentPlusIcon class="size-4" />
+            <div class="pl-2 text-xs">New File</div>
+            <div class="flex-grow"></div>
+            <CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm">⌘N</CommandShortcut>
+          </div>
+        </Button>
+      </SheetTrigger>
+      <SheetContent class="h-full">
+        <Newfilepanel class="h-full" @close-sheet="openNewFilePanel = false" />
+      </SheetContent>
+    </Sheet>
+    <Sheet v-model:open="openNewFolderPanel">
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="xs" class="rounded-md ">
+          <div class="flex flex-row items-center justify-start w-full">
+            <FolderPlusIcon class="size-4" />
+            <div class="pl-2 text-xs">New Folder</div>
+            <div class="flex-grow"></div>
+            <CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm">⌘F</CommandShortcut>
+          </div>
+        </Button>
+      </SheetTrigger>
+      <SheetContent class="h-full">
+        <Newfolderpanel class="h-full" @close-sheet="openNewFolderPanel = false" />
+      </SheetContent>
+    </Sheet>
+    <Button variant="ghost" size="xs" class="rounded-md ">
       <div class="flex flex-row items-center justify-start w-full">
-        <PlusCircledIcon class="mt-0.5" />
-        <div class="pl-2 text-xs">New Doc</div>
-        <div class="flex-grow"></div>
-        <CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm">⌘N</CommandShortcut>
-      </div>
-    </Button>
-    <Button variant="ghost" size="xs" class="h-8 mb-1 rounded-md ">
-      <div class="flex flex-row items-center justify-start w-full">
-        <CalendarIcon class="mt-0.5" />
+        <CalendarDaysIcon class="size-4" />
         <div class="pl-2 text-xs">Recent Docs</div>
         <div class="flex-grow"></div>
         <CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm">⌘R</CommandShortcut>
       </div>
     </Button>
-    <Button variant="ghost" size="xs" class="h-8 mb-1 rounded-md ">
+    <Button variant="ghost" size="xs" class="rounded-md ">
       <div class="flex flex-row items-center justify-start w-full">
-        <ArchiveIcon class="mt-0.5" />
-        <div class="pl-2 text-xs">Archive</div>
-        <div class="flex-grow"></div>
-        <CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm">⌘A</CommandShortcut>
-      </div>
-    </Button>
-    <Button variant="ghost" size="xs" class="h-8 mb-1 rounded-md ">
-      <div class="flex flex-row items-center justify-start w-full">
-        <MagnifyingGlassIcon class="mt-0.5" />
+        <MagnifyingGlassIcon class="size-4" />
         <div class="pl-2 text-xs">Search</div>
         <div class="flex-grow"></div>
         <CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm">⌘S</CommandShortcut>
@@ -66,12 +83,33 @@ const colorMode = useColorMode()
     <Separator orientation="horizontal" class="mt-2 mb-2" />
 
     <div class="w-full flex flex-col flex-grow">
-      <Collapsible v-model:open="isOpen1" class="w-full">
+      <Button variant="ghost" size="xs" class="rounded-md" @click="handleFolderClick('path')">
+        <div class="flex flex-row items-center justify-start w-full">
+          <DocumentDuplicateIcon class="size-4" />
+          <div class="pl-2 text-xs">Files</div>
+        </div>
+      </Button>
+      <Button variant="ghost" size="xs" class="rounded-md" @click="handleFolderClick('archive')">
+        <div class="flex flex-row items-center justify-start w-full">
+          <ArchiveBoxIcon class="size-4" />
+          <div class="pl-2 text-xs">Archive</div>
+        </div>
+      </Button>
+      <Button variant="ghost" size="xs" class="rounded-md" @click="handleFolderClick('trash')">
+        <div class="flex flex-row items-center justify-start w-full">
+          <TrashIcon class="size-4" />
+          <div class="pl-2 text-xs">Trash</div>
+        </div>
+      </Button>
+
+      <!--<Collapsible v-for="(folder, index) in data" :key="folder.id" v-model:open="isOpen" class="w-full">
         <CollapsibleTrigger class="w-full" asChild>
-          <Button variant="ghost" size="xs" class="w-full rounded-md bg-accent">
+          <Button variant="ghost" size="xs"
+            :class="['w-full', 'rounded-md', { 'bg-accent': folder.id === selectedFolder }]"
+            @click="handleFolderClick(`${folder.id}`)">
             <div class="flex flex-row items-center justify-start w-full">
               <BackpackIcon class="mt-0.5" />
-              <div class="pl-2 text-xs">Work</div>
+              <div class="pl-2 text-xs">{{ folder.name }}</div>
               <div class="flex-grow"></div>
               <PlusIcon class="mt-0.5 mr-1" />
               <CaretDownIcon class="mt-0.5" />
@@ -79,57 +117,9 @@ const colorMode = useColorMode()
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div class="flex flex-col space-y-1 ml-4 mt-1">
-            <Button variant="ghost" size="xs" class="w-full rounded-md bg-accent">
-              <div class="flex flex-row items-center justify-start w-full">
-                <PieChartIcon class="mt-0.5" />
-                <div class="pl-2 text-xs ">Analytics</div>
-              </div>
-            </Button>
-            <Button variant="ghost" size="xs" class="w-full rounded-md">
-              <div class="flex flex-row items-center justify-start flex-grow">
-                <PersonIcon class="mt-0.5 " />
-                <div class="pl-2 text-xs">People</div>
-              </div>
-            </Button>
-            <Button variant="ghost" size="xs" class="w-full rounded-md">
-              <div class="flex flex-row items-center justify-start flex-grow">
-                <RocketIcon class="mt-0.5 " />
-                <div class="pl-2 text-xs">Ideas</div>
-              </div>
-            </Button>
-          </div>
         </CollapsibleContent>
       </Collapsible>
-      <Collapsible v-model:open="isOpen" class="w-full mt-2">
-        <CollapsibleTrigger class="w-full" asChild>
-          <Button variant="ghost" size="xs" class="w-full rounded-md">
-            <div class="flex flex-row items-center justify-start w-full">
-              <HomeIcon class="mt-0.5" />
-              <div class="pl-2 text-xs">Personal</div>
-              <div class="flex-grow"></div>
-              <PlusIcon class="mt-0.5 mr-1" />
-              <CaretDownIcon class="mt-0.5" />
-            </div>
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div class="flex flex-col mx-4 space-y-1 mt-1">
-            <Button variant="ghost" size="xs" class="w-full rounded-md">
-              <div class="flex flex-row items-center justify-start w-full">
-                <Pencil1Icon class="mt-0.5" />
-                <div class="pl-2 text-xs ">Notes</div>
-              </div>
-            </Button>
-            <Button variant="ghost" size="xs" class="w-full rounded-md">
-              <div class="flex flex-row items-center justify-start flex-grow">
-                <FigmaLogoIcon class="mt-0.5" />
-                <div class="pl-2 text-xs">Design Ideas</div>
-              </div>
-            </Button>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      -->
 
       <div class="flex-grow"></div>
 
@@ -138,25 +128,25 @@ const colorMode = useColorMode()
       <div class="flex flex-col w-full">
         <Button variant="ghost" size="xs" class="w-full rounded-md">
           <div class="flex flex-row items-center justify-start w-full">
-            <GearIcon class="mt-0.5" />
+            <Cog6ToothIcon class="size-4" />
             <div class="pl-2 text-xs">Settings</div>
           </div>
         </Button>
         <Button variant="ghost" size="xs" class="w-full rounded-md">
           <div class="flex flex-row items-center justify-start w-full">
-            <PersonIcon class="mt-0.5" />
+            <UserIcon class="size-4" />
             <div class="pl-2 text-xs">Account</div>
           </div>
         </Button>
         <Button variant="ghost" size="xs" class="w-full rounded-md">
           <div class="flex flex-row items-center justify-start w-full">
-            <QuestionMarkCircledIcon class="mt-0.5" />
+            <QuestionMarkCircleIcon class="size-4" />
             <div class="pl-2 text-xs">Help</div>
           </div>
         </Button>
         <Button variant="ghost" size="xs" class="w-full rounded-md" @click="colorMode.preference = 'light'">
           <div class="flex flex-row items-center justify-start w-full">
-            <MoonIcon class="mt-0.5" />
+            <MoonIcon class="size-4" />
             <div class="pl-2 text-xs">Theme</div>
           </div>
         </Button>
