@@ -12,7 +12,7 @@ const route = useRoute()
 const user = useCurrentUser();
 const storage = useFirebaseStorage()
 
-const filePath = `${user.value.uid}/${route.params.id}.txt`
+const filePath = `${user.value.uid}/${route.params.id}`
 const { fileContent, loading, error, fetchFileContent } = useFileContent();
 
 onMounted(async () => {

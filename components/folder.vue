@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FolderIcon, DocumentTextIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
-import { doc, collection, deleteDoc } from 'firebase/firestore';
+import { writeBatch, doc, collection, deleteDoc, query, where, getDoc, getDocs } from 'firebase/firestore';
+import { deleteObject, ref as storageRef } from 'firebase/storage';
 
 defineProps({
   folder: Object,
@@ -10,26 +11,75 @@ defineProps({
 
 const user = useCurrentUser()
 const db = useFirestore()
+const storage = useFirebaseStorage()
 const store = useFileTreeStore();
 
-async function handleDeleteFolder(id: String) {
+const emit = defineEmits(['delete-folder']);
+
+async function gatherIdsToDelete(folder: any) {
+  let filesToDelete = folder.files.map(file => file.id);
+  let foldersToDelete = [folder.id];
+
+  for (const subfolder of folder.subfolders) {
+    const subfolderIds = await gatherIdsToDelete(subfolder);
+    filesToDelete = filesToDelete.concat(subfolderIds.files);
+    foldersToDelete = foldersToDelete.concat(subfolderIds.folders);
+  }
+
+  return {
+    files: filesToDelete,
+    folders: foldersToDelete
+  };
+}
+
+async function handleDeleteFolder(folder: any) {
   if (!user.value) return;
-  const documentToDelete = doc(collection(db, 'users', user.value.uid, 'folders'), id)
-  await deleteDoc(documentToDelete).then(() => {
-    console.log('Document successfully deleted!');
-  }).catch((error) => {
-    console.error('Error removing document: ', error);
-  });
+  emit('delete-folder');
+
+  const idsToDelete = await gatherIdsToDelete(folder);
+
+  for (const fileId of idsToDelete.files) {
+    try {
+      await handleDeleteFile(fileId);
+      console.log('File successfully deleted!', fileId);
+    } catch (error) {
+      console.error('Error removing file:', error);
+    }
+  }
+
+  try {
+    const batch = writeBatch(db);
+
+    for (const folderId of idsToDelete.folders) {
+      const folderToDeleteRef = doc(collection(db, 'users', user.value.uid, 'folders'), folderId);
+      batch.delete(folderToDeleteRef);
+    }
+
+    await batch.commit();
+    console.log('Folders successfully deleted in batch!');
+  } catch (error) {
+    console.error('Error deleting folders in batch:', error);
+  }
 }
 
 async function handleDeleteFile(id: String) {
   if (!user.value) return;
-  const documentToDelete = doc(collection(db, 'users', user.value.uid, 'files'), id)
-  await deleteDoc(documentToDelete).then(() => {
-    console.log('Document successfully deleted!');
+  const fileContentRef = storageRef(storage, `${user.value.uid}/${id}`);
+  console.log('Deleting file content...', id);
+  await deleteObject(fileContentRef).then(async () => {
+    console.log('File content successfully deleted!');
+    const documentToDelete = doc(collection(db, 'users', user.value.uid, 'files'), id)
+
+    console.log('Deleting document...');
+    await deleteDoc(documentToDelete).then(() => {
+      console.log('Document successfully deleted!');
+    }).catch((error) => {
+      console.error('Error removing document: ', error);
+    });
   }).catch((error) => {
-    console.error('Error removing document: ', error);
+    console.error('Error removing file content: ', error);
   });
+
 }
 </script>
 
@@ -48,7 +98,7 @@ async function handleDeleteFile(id: String) {
           </Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem @click="handleDeleteFolder(subfolder.id)">Delete Folder</ContextMenuItem>
+          <ContextMenuItem @click="handleDeleteFolder(subfolder)">Delete Folder</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
 

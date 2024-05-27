@@ -32,16 +32,19 @@ const createFolder = async () => {
   if (!user.value || !folders.value) return;
   try {
     const folderData = folders.value[0];
+    const folderPath = path.value === "/" ? `/${name.value}` : `${path.value}/${name.value}`;
 
     await addDoc(collection(db, 'users', user.value.uid, 'folders'), {
       name: name.value,
       children: [],
       parentId: folderData.id,
-      path: path.value + name.value,
+      path: folderPath,
     }).then(() => {
       console.log('Folder successfully written!');
       emit('close-sheet');
-    });
+    }).catch((error) => {
+      console.error('Error writing document: ', error);
+    })
 
   } catch (e) {
     console.error(e)

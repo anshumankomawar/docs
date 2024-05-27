@@ -46,11 +46,16 @@ const handleColumnClick = (index: number) => {
   store.path = store.path.slice(0, index + 1);
 };
 
+const handleDeleteFolder = (index: number) => {
+  columns.value = columns.value.slice(0, index + 1);
+  store.path = store.path.slice(0, index + 1);
+}
+
 let unsubscribeFolders: (() => void) | null = null;
 let unsubscribeFiles: (() => void) | null = null;
 
 const updateTree = () => {
-  if (folders.value.length && files.value.length) {
+  if (folders.value.length || files.value.length) {
     tree.value = generateTree({ folders: folders.value, files: files.value });
     loadColumns(store.path.slice(1));
   }
@@ -61,6 +66,7 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+  console.log(store.path)
   if (user.value) {
     const foldersQuery = query(collection(db, 'users', user.value.uid, 'folders'));
     unsubscribeFolders = onSnapshot(foldersQuery, (snapshot) => {
@@ -87,7 +93,8 @@ onBeforeUnmount(() => {
     <div class="flex h-full py-2 overflow-x-scroll">
       <div class="border-r min-w-[200px] px-2" v-for="(folder, index) in columns" :key="index"
         @click="handleColumnClick(index)">
-        <Folder :folder="folder" :handleSelectFolder="handleSelectFolder" :index="index" />
+        <Folder :folder="folder" :handleSelectFolder="handleSelectFolder" :index="index"
+          @delete-folder="handleDeleteFolder(index)" />
       </div>
     </div>
   </div>

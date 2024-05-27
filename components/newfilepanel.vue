@@ -35,27 +35,26 @@ const stringToBlob = (str) => {
 };
 
 const createFile = async () => {
+  console.log('Creating file...', folders.value, path.value);
   if (!user.value || !folders.value) return;
-  try {
-    const folderData = folders.value[0];
+  const folderData = folders.value[0];
+  console.log('Creating file...', folderData.path);
 
-    await addDoc(collection(db, 'users', user.value.uid, 'files'), {
-      name: name.value,
-      parentId: folderData.id,
-    }).then((doc) => {
-      console.log('Document successfully written!');
-      const newFileRef = storageRef(storage, `${user.value.uid}/${doc.id}.txt`);
-      uploadString(newFileRef, '<h1>Hello World</h1>').then(() => {
-        console.log('Created new file in storage!');
-        emit('close-sheet');
-      }).catch((error) => {
-        console.error('Error creating new file in storage:', error);
-      })
-    });
-
-  } catch (e) {
-    console.error(e)
-  }
+  await addDoc(collection(db, 'users', user.value.uid, 'files'), {
+    name: name.value,
+    parentId: folderData.id,
+    path: `${path.value}/${name.value}`,
+  }).then((doc) => {
+    const newFileRef = storageRef(storage, `${user.value.uid}/${doc.id}`);
+    uploadString(newFileRef, '<h1>Hello World</h1>').then(() => {
+      emit('close-sheet');
+    }).catch((error) => {
+      console.error('Error creating new file in storage:', error);
+    })
+  }).catch((error) => {
+    console.error('Error writing document: ', error);
+  })
+  console.log('Finished creating file...');
 }
 
 const nameInput = ref(null);
