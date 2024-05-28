@@ -9,13 +9,11 @@ const props = defineProps<{
 </script>
 
 <template>
-  <li
-    role="presentation"
-    aria-hidden="true"
-    :class="cn('[&>svg]:size-3.5', props.class)"
-  >
+  <li role="presentation" aria-hidden="true" :class="cn('[&>svg]:size-3.5', props.class)">
     <slot>
-      <ChevronRightIcon />
+      <div class="text-xs">
+        /
+      </div>
     </slot>
   </li>
 </template>

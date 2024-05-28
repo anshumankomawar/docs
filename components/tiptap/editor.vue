@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/vue-3'
+import { ref as storageRef, uploadString } from 'firebase/storage'
 import StarterKit from '@tiptap/starter-kit'
 import Document from '@tiptap/extension-document'
 import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
+const storage = useFirebaseStorage()
 
 const CustomDocument = Document.extend({
   content: 'block*',
 })
 
 const props = defineProps<{
-  initialContent: string
+  initialContent: string,
+  filePath: string
 }>()
 
 const editor = useEditor({
@@ -39,6 +42,30 @@ const editor = useEditor({
     }),
   ],
 })
+
+const handleSaveShortcut = async (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+    event.preventDefault();
+    if (!editor.value) return;
+    const htmlToSave = editor.value.getHTML();
+    if (!htmlToSave) return;
+
+    console.log('Saving file...', props.filePath);
+    await uploadString(storageRef(storage, props.filePath), htmlToSave).then(() => {
+      console.log('File saved');
+    }).catch((error) => {
+      console.error('Error saving file:', error);
+    });
+  }
+};
+
+onMounted(async () => {
+  window.addEventListener('keydown', handleSaveShortcut);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleSaveShortcut);
+});
 </script>
 
 <template>

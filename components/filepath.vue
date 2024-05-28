@@ -18,7 +18,8 @@ const store = useFileTreeStore();
       <BreadcrumbList>
         <template v-for="(item, index) in store.path" :key="index">
           <BreadcrumbItem>
-            <BreadcrumbLink :href="item.link" class="text-sm">
+            <BreadcrumbLink :href="item.link" class="text-xs"
+              :class="{ 'dark:text-white text-black': index === store.path.length - 1 }">
               {{ item }}
             </BreadcrumbLink>
           </BreadcrumbItem>

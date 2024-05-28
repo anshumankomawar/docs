@@ -35,6 +35,9 @@ module.exports = {
 				ring: "hsl(var(--ring))",
 				background: "hsl(var(--background))",
 				foreground: "hsl(var(--foreground))",
+				altbackground: "hsl(var(--altbackground))",
+				altaccent: "hsl(var(--altaccent))",
+				altborder: "hsl(var(--altborder))",
 				primary: {
 					DEFAULT: "hsl(var(--primary))",
 					foreground: "hsl(var(--primary-foreground))",
@@ -98,4 +101,3 @@ module.exports = {
 	},
 	plugins: [animate, require("@tailwindcss/typography")],
 };
-

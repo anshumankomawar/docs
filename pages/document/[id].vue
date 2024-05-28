@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { DocumentTextIcon, LinkIcon } from '@heroicons/vue/24/outline';
-import { ref as storageRef } from 'firebase/storage'
+import { useEditor } from '@tiptap/vue-3';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import {
+  FontBoldIcon,
+  FontItalicIcon,
+  UnderlineIcon,
+} from '@radix-icons/vue'
 
 
 definePageMeta({
@@ -10,7 +16,6 @@ const tags = ['Vue.js', 'JavaScript', 'Tailwind CSS', 'Firebase', 'Node.js', 'HT
 
 const route = useRoute()
 const user = useCurrentUser();
-const storage = useFirebaseStorage()
 
 const filePath = `${user.value.uid}/${route.params.id}`
 const { fileContent, loading, error, fetchFileContent } = useFileContent();
@@ -22,8 +27,10 @@ onMounted(async () => {
 
 <template>
   <div class="flex overflow-hidden">
+
+    <!-- Editor Content -->
     <div v-if="fileContent !== null" class="flex-1 overflow-y-scroll pt-16">
-      <TiptapEditor :initial-content="fileContent" />
+      <TiptapEditor :initial-content="fileContent" :file-path="filePath" />
     </div>
     <div v-else class="flex-1 h-full w-full px-8">
       <div class="space-y-2 mt-24">
@@ -33,6 +40,7 @@ onMounted(async () => {
         <Skeleton class="flex-1 w-full" />
       </div>
     </div>
+    <!--
     <Separator orientation="vertical" class="mt-24" />
     <div class="max-w-[200px] flex flex-col px-4 space-y-2 mt-24">
       <div class="flex items-center justify-start text-nowrap">
@@ -65,5 +73,6 @@ onMounted(async () => {
         </span>
       </div>
     </div>
+-->
   </div>
 </template>

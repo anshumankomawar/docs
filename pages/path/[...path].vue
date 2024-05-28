@@ -90,8 +90,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="w-full h-full overflow-x-hidden">
-    <div class="flex h-full py-2 overflow-x-scroll">
-      <div class="border-r min-w-[200px] px-2" v-for="(folder, index) in columns" :key="index"
+    <div class="flex h-full overflow-x-scroll">
+      <div class="border-r min-w-[200px] px-2 pt-2 " v-for="(folder, index) in columns" :key="index"
         @click="handleColumnClick(index)">
         <Folder :folder="folder" :handleSelectFolder="handleSelectFolder" :index="index"
           @delete-folder="handleDeleteFolder(index)" />

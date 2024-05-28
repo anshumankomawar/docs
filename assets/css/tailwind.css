@@ -6,6 +6,9 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
+    --altbackground: 0, 0%, 98%;
+    --altaccent: 240 4.8% 95.9%;
+    --altborder: 240 5.9% 90%;
 
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
@@ -37,8 +40,11 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 224, 9%, 12%;
     --foreground: 0 0% 98%;
+    --altbackground: 224, 7%, 15%;
+    --altaccent: 220, 3%, 21%;
+    --altborder: 224, 6%, 18%;
 
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
@@ -58,7 +64,7 @@
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 220, 3%, 21%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
