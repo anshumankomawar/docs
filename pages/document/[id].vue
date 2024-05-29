@@ -12,34 +12,50 @@ import {
 definePageMeta({
   layout: 'editor'
 })
+
 const tags = ['Vue.js', 'JavaScript', 'Tailwind CSS', 'Firebase', 'Node.js', 'HTML', 'CSS', 'Webpack', 'Babel']
 
 const route = useRoute()
 const user = useCurrentUser();
+const store = useFileTreeStore();
+const displayPath = store.path.slice(1).join('/') + '/mobydick.txt'
+const filePath = ref('');
 
-const filePath = `${user.value.uid}/${route.params.id}`
 const { fileContent, loading, error, fetchFileContent } = useFileContent();
 
-onMounted(async () => {
-  await fetchFileContent(filePath);
+onMounted(() => {
+  if (user.value) {
+    filePath.value = `${user.value.uid}/${route.params.id}`;
+    fetchFileContent(filePath.value);
+  } else {
+    const unwatch = watch(user, (newUser) => {
+      if (newUser) {
+        filePath.value = `${newUser.uid}/${route.params.id}`;
+        fetchFileContent(filePath.value);
+        unwatch(); // Stop watching after the user is set
+      }
+    });
+  }
 });
 </script>
 
 <template>
   <div class="flex overflow-hidden">
-
-    <!-- Editor Content -->
-    <div v-if="fileContent !== null" class="flex-1 overflow-y-scroll pt-16">
-      <TiptapEditor :initial-content="fileContent" :file-path="filePath" />
-    </div>
-    <div v-else class="flex-1 h-full w-full px-8">
-      <div class="space-y-2 mt-24">
-        <Skeleton class="h-8 w-full" />
-        <Skeleton class="h-4 w-full" />
-        <Skeleton class="h-24 w-full" />
-        <Skeleton class="flex-1 w-full" />
+    <div class="flex-1 flex flex-col">
+      <div v-if="fileContent !== null" class="flex-1 overflow-y-scroll pt-16 md:mx-16 lg:mx-36 pb-4">
+        <TiptapEditor :initial-content="fileContent" :file-path="filePath" />
+      </div>
+      <div v-else class="flex-1 h-full w-full px-8">
+        <div class="space-y-2 mt-24">
+          <Skeleton class="h-8 w-full" />
+          <Skeleton class="h-4 w-full" />
+          <Skeleton class="h-24 w-full" />
+          <Skeleton class="flex-1 w-full" />
+        </div>
       </div>
     </div>
+    <div class="w-[250px] bg-altbackground border-l border-altborder"></div>
+
     <!--
     <Separator orientation="vertical" class="mt-24" />
     <div class="max-w-[200px] flex flex-col px-4 space-y-2 mt-24">

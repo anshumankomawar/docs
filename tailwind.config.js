@@ -38,6 +38,7 @@ module.exports = {
 				altbackground: "hsl(var(--altbackground))",
 				altaccent: "hsl(var(--altaccent))",
 				altborder: "hsl(var(--altborder))",
+				bgcommand: "hsl(var(--bgcommand))",
 				primary: {
 					DEFAULT: "hsl(var(--primary))",
 					foreground: "hsl(var(--primary-foreground))",

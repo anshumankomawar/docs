@@ -60,11 +60,9 @@ const handleSaveShortcut = async (event) => {
 };
 
 onMounted(async () => {
-  window.addEventListener('keydown', handleSaveShortcut);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleSaveShortcut);
 });
 </script>
 
@@ -81,7 +79,7 @@ onBeforeUnmount(() => {
         Strike
       </button>
     </bubble-menu>
-    <editor-content :editor="editor" class="h-full overflow-y-scroll pt-8 flex-grow max-w-none lg:mx-20 md:mx-12" />
+    <editor-content :editor="editor" class="h-full overflow-y-scroll pt-8 flex-grow max-w-none" />
   </div>
 </template>
 

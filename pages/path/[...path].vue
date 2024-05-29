@@ -10,8 +10,6 @@ interface Folder {
   subfolders: Folder[];
 }
 
-const route = useRoute();
-const router = useRouter();
 const store = useFileTreeStore();
 store.$subscribe(() => {
   store.saveToLocalStorage();
@@ -20,7 +18,7 @@ const user = useCurrentUser();
 const db = useFirestore();
 const tree = ref<Folder[]>([]);
 const columns = ref<Folder[]>([]);
-const folders = ref<Folder[]>([]);
+const folders = ref<any[]>([]);
 const files = ref<any[]>([]);
 
 const loadColumns = (pathArray: string[]) => {
@@ -66,7 +64,6 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  console.log(store.path)
   if (user.value) {
     const foldersQuery = query(collection(db, 'users', user.value.uid, 'folders'));
     unsubscribeFolders = onSnapshot(foldersQuery, (snapshot) => {
@@ -91,7 +88,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="w-full h-full overflow-x-hidden">
     <div class="flex h-full overflow-x-scroll">
-      <div class="border-r min-w-[200px] px-2 pt-2 " v-for="(folder, index) in columns" :key="index"
+      <div class="border-r min-w-[200px] px-2 pt-2" v-for="(folder, index) in columns" :key="index"
         @click="handleColumnClick(index)">
         <Folder :folder="folder" :handleSelectFolder="handleSelectFolder" :index="index"
           @delete-folder="handleDeleteFolder(index)" />

@@ -68,6 +68,7 @@ async function handleDeleteFile(id: String) {
   console.log('Deleting file content...', id);
   await deleteObject(fileContentRef).then(async () => {
     console.log('File content successfully deleted!');
+    if (!user.value) return;
     const documentToDelete = doc(collection(db, 'users', user.value.uid, 'files'), id)
 
     console.log('Deleting document...');
@@ -88,7 +89,7 @@ async function handleDeleteFile(id: String) {
     <div v-for="subfolder in folder.subfolders" :key="subfolder.id" @click="handleSelectFolder(subfolder, index)">
       <ContextMenu>
         <ContextMenuTrigger>
-          <Button variant="ghost" size="xs" class="w-full rounded-md"
+          <Button variant="ghost" size="xs" class="w-full rounded-md h-8 max-h-8"
             :class="{ 'bg-accent': store.path.slice(1).at(index) === subfolder.name }">
             <div class="flex flex-row items-center justify-start w-full">
               <FolderIcon class="size-4" />

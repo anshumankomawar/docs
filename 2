@@ -9,14 +9,10 @@ const accounts = [
 ]
 
 const isCollapsed = ref(false)
-const isNewFilePanelOpen = ref(false)
+const openNewFilePanel = ref(false)
 const openNewFolderPanel = ref(false)
 const colorMode = useColorMode()
 const isNotificationsOpen = ref(false)
-
-function openNewFilePanel() {
-  isNewFilePanelOpen.value = true
-}
 
 function handleFolderClick(path: string) {
   navigateTo(`/${path}`)
@@ -25,25 +21,24 @@ function handleFolderClick(path: string) {
 
 <template>
   <div class="w-[250px] flex-none flex flex-col h-full overflow-none bg-altbackground py-2">
-    <CommandPanel :open="openNewFilePanel" />
+    <CommandPanel />
     <div class="px-2 pb-2 border-b border-altborder h-10">
       <SidebarSwitcher :is-collapsed="isCollapsed" :accounts="accounts" />
     </div>
-    <div class="max-h-8 h-8 mx-2 flex space-x-1 text-xs text-start items-center justify-center mt-2">
-      <div
-        class="h-full flex-1 flex bg-background rounded-lg px-1.5 my-1 items-center justify-center border border-altborder">
+    <div class="max-h-8 mx-2 my-0 flex space-x-1 text-xs text-start items-center justify-center">
+      <div class="flex-1 flex bg-background rounded-lg px-2 my-1 items-center justify-center border border-altborder">
         <CommandLineIcon class="size-4 mr-2" />
         <div>Quick Actions</div>
-        <CommandShortcut class="border px-1 py-0.5 rounded-md w-min">⌘K</CommandShortcut>
+        <CommandShortcut class="border px-1 my-0.5 rounded-md w-min">⌘K</CommandShortcut>
       </div>
-      <div class="h-full flex bg-background rounded-md items-center justify-center border border-altborder">
+      <div class="flex bg-background rounded-md items-center justify-center border border-altborder">
         <MagnifyingGlassIcon class="size-4 mx-1" />
-        <CommandShortcut class="border px-1 mr-1 rounded-md size-5 text-center">/</CommandShortcut>
+        <CommandShortcut class="border px-1 rounded-md  text-center">/</CommandShortcut>
       </div>
     </div>
     <Popover v-model:open="isNotificationsOpen">
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent mt-2"
+        <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent"
           :class="{ 'bg-accent': isNotificationsOpen }">
           <div class="flex flex-row items-center justify-start w-full">
             <BellIcon class="size-4" />
@@ -59,7 +54,7 @@ function handleFolderClick(path: string) {
       </PopoverContent>
     </Popover>
 
-    <Sheet v-model:open="isNewFilePanelOpen">
+    <Sheet v-model:open="openNewFilePanel">
       <SheetTrigger asChild>
         <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent">
           <div class="flex flex-row items-center justify-start w-full">
@@ -71,7 +66,7 @@ function handleFolderClick(path: string) {
         </Button>
       </SheetTrigger>
       <SheetContent class="h-full">
-        <Newfilepanel class="h-full" @close-sheet="isNewFilePanelOpen = false" />
+        <Newfilepanel class="h-full" @close-sheet="openNewFilePanel = false" />
       </SheetContent>
     </Sheet>
     <Sheet v-model:open="openNewFolderPanel">
