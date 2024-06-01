@@ -98,7 +98,7 @@ async function handleDeleteFile(id: String) {
             </div>
           </Button>
         </ContextMenuTrigger>
-        <ContextMenuContent>
+        <ContextMenuContent class="bg-background border-altborder">
           <ContextMenuItem @click="handleDeleteFolder(subfolder)">Delete Folder</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
@@ -114,7 +114,7 @@ async function handleDeleteFile(id: String) {
             </div>
           </Button>
         </ContextMenuTrigger>
-        <ContextMenuContent>
+        <ContextMenuContent class="bg-background border-altborder">
           <ContextMenuItem @click="handleDeleteFile(file.id)">Delete File</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

@@ -1,59 +1,57 @@
 <script setup lang="ts">
 import { BellIcon, CalendarDaysIcon, SparklesIcon, Cog6ToothIcon, DocumentPlusIcon, FolderPlusIcon, MagnifyingGlassIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
 import { useMagicKeys } from '@vueuse/core'
+import { useCommandPanelStore } from '@/stores/commandpanel';
 
-type Model = {
-  commandPath: string
-  isCommandOpen: boolean
-}
-
-const model = defineModel<Model>({ required: true })
-
+const store = useCommandPanelStore()
 const keys = useMagicKeys()
 const CmdK = keys['Cmd+K']
 const CmdN = keys['Cmd+I']
 const colorMode = useColorMode()
 
 function handleCreateFile() {
-  model.value.commandPath = 'create-file'
+  store.updateCommandPath('create-file')
 }
 
 function handleCreateFolder() {
-  model.value.commandPath = 'create-folder'
+  store.updateCommandPath('create-folder')
 }
 
 function handleToggleTheme() {
   colorMode.value = colorMode.value === 'dark' ? 'light' : 'dark'
-  model.value.isCommandOpen = false
+  store.updateIsCommandOpen(false)
 }
 
 function lastCommand() {
-  model.value.commandPath = ''
+  store.updateCommandPath('')
 }
 
 function handleOpenChange(v: boolean) {
   if (!v) {
-    model.value.isCommandOpen = v
+    store.updateIsCommandOpen(v)
   }
 }
 
 watch(CmdK, (v) => {
-  if (v)
-    model.value = { commandPath: '', isCommandOpen: true }
+  if (v) {
+    store.updateCommandPath('')
+    store.updateIsCommandOpen(true)
+  }
 })
 
 watch(CmdN, (v) => {
   if (v) {
-    model.value = { commandPath: 'create-file', isCommandOpen: true }
+    store.updateCommandPath('create-file')
+    store.updateIsCommandOpen(true)
   }
 })
 
 </script>
 
 <template>
-  <CommandDialog :open="model.isCommandOpen" @update:open="handleOpenChange"
-    class="bg-altbackground ring-none outline-none" :is-command="model.commandPath === ''">
-    <div v-if="model.commandPath === ''">
+  <CommandDialog :open="store.isCommandOpen" @update:open="handleOpenChange"
+    class="bg-altbackground ring-none outline-none" :is-command="store.commandPath === ''">
+    <div v-if="store.commandPath === ''">
       <CommandInput placeholder="Type a command or search..." class="" />
       <CommandList>
         <CommandGroup heading="Quick Action">
@@ -117,10 +115,10 @@ watch(CmdN, (v) => {
     </div>
 
     <div v-else class="py-2 overflow-y-scroll">
-      <DialogCreateFile v-if="model.commandPath === 'create-file'" @back-clicked="lastCommand"
-        @created-file="model.isCommandOpen = false" />
-      <DialogCreateFolder v-if="model.commandPath === 'create-folder'" @back-clicked="lastCommand"
-        @created-folder="model.isCommandOpen = false" />
+      <DialogCreateFile v-if="store.commandPath === 'create-file'" @back-clicked="lastCommand"
+        @created-file="store.isCommandOpen = false" />
+      <DialogCreateFolder v-if="store.commandPath === 'create-folder'" @back-clicked="lastCommand"
+        @created-folder="store.isCommandOpen = false" />
     </div>
   </CommandDialog>
 </template>

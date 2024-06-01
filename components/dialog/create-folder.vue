@@ -3,11 +3,13 @@ import { ChevronLeftIcon, FolderIcon } from '@heroicons/vue/24/outline';
 import { collection, query, where, addDoc } from 'firebase/firestore'
 import { useFocus } from '@vueuse/core'
 
+const emit = defineEmits(['created-folder', 'back-clicked']);
+
 const user = useCurrentUser()
 const db = useFirestore()
-const emit = defineEmits(['created-folder', 'back-clicked']);
+const fileTreeStore = useFileTreeStore()
 const tags = ref([])
-const path = ref<string>("/" + useFileTreeStore().path.slice(1).join('/'))
+const path = ref<string>('')
 const name = ref<string>('')
 
 const folderQuery = computed(() => {
@@ -43,6 +45,15 @@ const createFolder = async () => {
 
 const filenameInput = ref(null);
 useFocus(filenameInput, { initialValue: true })
+
+onMounted(async () => {
+  if (fileTreeStore.selectedPath !== '') {
+    path.value = fileTreeStore.selectedPath;
+    fileTreeStore.selectedPath = '';
+  } else {
+    path.value = "/" + useFileTreeStore().path.slice(1).join('/');
+  }
+})
 </script>
 
 <template>
@@ -62,7 +73,7 @@ useFocus(filenameInput, { initialValue: true })
     <div class="grid items-center gap-1.5 ">
       <Label for="email" class="text-xs ml-1">Folder Name</Label>
       <Input ref="filenameInput" id="path" class="border-altborder bg-background" v-model="name" type="email"
-        placeholder="Untitled" />
+        placeholder="Untitled" autofocus />
     </div>
     <div>
       <Label for="email" class="text-xs ml-1">Description</Label>

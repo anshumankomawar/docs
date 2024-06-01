@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CommandLineIcon, UserIcon, CalendarDaysIcon, DocumentDuplicateIcon, DocumentPlusIcon, FolderPlusIcon, MagnifyingGlassIcon, FolderIcon, ArchiveBoxIcon, TrashIcon, Cog6ToothIcon, QuestionMarkCircleIcon, MoonIcon, BellIcon } from '@heroicons/vue/24/outline'
+import { useCommandPanelStore } from '~/stores/commandpanel';
 const accounts = [
   {
     label: 'Docs',
@@ -8,19 +9,19 @@ const accounts = [
   },
 ]
 
+const { updateCommandPath, updateIsCommandOpen } = useCommandPanelStore()
 const isCollapsed = ref(false)
-const isNewFilePanelOpen = ref(false)
-const openNewFolderPanel = ref(false)
 const colorMode = useColorMode()
 const isNotificationsOpen = ref(false)
-const commandModel = ref({ commandPath: '', isCommandOpen: false })
 
 function handleNewFileClick() {
-  commandModel.value = { commandPath: 'create-file', isCommandOpen: true }
+  updateCommandPath('create-file')
+  updateIsCommandOpen(true)
 }
 
-function handleNewFolderClick(path: string) {
-  commandModel.value = { commandPath: 'create-folder', isCommandOpen: true }
+function handleNewFolderClick() {
+  updateCommandPath('create-folder')
+  updateIsCommandOpen(true)
 }
 
 function handleFilesClick(path: string) {
@@ -30,7 +31,7 @@ function handleFilesClick(path: string) {
 
 <template>
   <div class="w-[250px] flex-none flex flex-col h-full overflow-none bg-altbackground py-2">
-    <CommandPanel v-model="commandModel" />
+    <CommandPanel />
     <div class="px-2 pb-2 border-b border-altborder h-10">
       <SidebarSwitcher :is-collapsed="isCollapsed" :accounts="accounts" />
     </div>

@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useFileTreeStore } from '@/stores/filetree';
+import { useCommandPanelStore } from '@/stores/commandpanel';
 
 interface Folder {
   id: string;
   name: string;
+  path: string;
   subfolders: Folder[];
 }
 
-const store = useFileTreeStore();
-store.$subscribe(() => {
-  store.saveToLocalStorage();
+const commandPanelStore = useCommandPanelStore();
+const filetreeStore = useFileTreeStore();
+filetreeStore.$subscribe(() => {
+  filetreeStore.saveToLocalStorage();
 });
 const user = useCurrentUser();
 const db = useFirestore();
@@ -35,18 +37,18 @@ const loadColumns = (pathArray: string[]) => {
 };
 
 const handleSelectFolder = (subfolder: Folder, index: number) => {
-  store.path = store.path.slice(0, index + 1).concat(subfolder.name);
+  filetreeStore.path = filetreeStore.path.slice(0, index + 1).concat(subfolder.name);
   columns.value = columns.value.slice(0, index + 1).concat(subfolder);
 };
 
 const handleColumnClick = (index: number) => {
   columns.value = columns.value.slice(0, index + 1);
-  store.path = store.path.slice(0, index + 1);
+  filetreeStore.path = filetreeStore.path.slice(0, index + 1);
 };
 
 const handleDeleteFolder = (index: number) => {
   columns.value = columns.value.slice(0, index + 1);
-  store.path = store.path.slice(0, index + 1);
+  filetreeStore.path = filetreeStore.path.slice(0, index + 1);
 }
 
 let unsubscribeFolders: (() => void) | null = null;
@@ -55,12 +57,12 @@ let unsubscribeFiles: (() => void) | null = null;
 const updateTree = () => {
   if (folders.value.length || files.value.length) {
     tree.value = generateTree({ folders: folders.value, files: files.value });
-    loadColumns(store.path.slice(1));
+    loadColumns(filetreeStore.path.slice(1));
   }
 };
 
 onBeforeMount(() => {
-  store.loadFromLocalStorage();
+  filetreeStore.loadFromLocalStorage();
 });
 
 onMounted(() => {
@@ -83,16 +85,33 @@ onBeforeUnmount(() => {
   if (unsubscribeFolders) unsubscribeFolders();
   if (unsubscribeFiles) unsubscribeFiles();
 });
+
+function handleNewFile(path: string) {
+  filetreeStore.selectedPath = path;
+  commandPanelStore.updateCommandPath('create-file');
+  commandPanelStore.updateIsCommandOpen(true);
+}
+
+function handleNewFolder(path: string) {
+  filetreeStore.selectedPath = path;
+  commandPanelStore.updateCommandPath('create-folder');
+  commandPanelStore.updateIsCommandOpen(true);
+}
 </script>
 
 <template>
   <div class="w-full h-full overflow-x-hidden">
     <div class="flex h-full overflow-x-scroll">
-      <div class="border-r min-w-[200px] px-2 pt-2" v-for="(folder, index) in columns" :key="index"
-        @click="handleColumnClick(index)">
-        <Folder :folder="folder" :handleSelectFolder="handleSelectFolder" :index="index"
-          @delete-folder="handleDeleteFolder(index)" />
-      </div>
+      <ContextMenu v-for="(folder, index) in columns" :key="index">
+        <ContextMenuTrigger class="border-r min-w-[200px] px-2 pt-2" @click="handleColumnClick(index)">
+          <Folder :folder="folder" :handleSelectFolder="handleSelectFolder" :index="index"
+            @delete-folder="handleDeleteFolder(index)" />
+        </ContextMenuTrigger>
+        <ContextMenuContent class="bg-background border-altborder">
+          <ContextMenuItem @select="handleNewFile(folder.path)">New File</ContextMenuItem>
+          <ContextMenuItem @select="handleNewFolder(folder.path)">NewFolder</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     </div>
   </div>
 </template>

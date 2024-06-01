@@ -2,6 +2,7 @@ export const useFileTreeStore = defineStore("filetree", {
 	state: () => {
 		return {
 			path: ["Home"],
+			selectedPath: "",
 		};
 	},
 	actions: {
