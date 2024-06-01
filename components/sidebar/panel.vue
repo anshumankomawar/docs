@@ -13,19 +13,24 @@ const isNewFilePanelOpen = ref(false)
 const openNewFolderPanel = ref(false)
 const colorMode = useColorMode()
 const isNotificationsOpen = ref(false)
+const commandModel = ref({ commandPath: '', isCommandOpen: false })
 
-function openNewFilePanel() {
-  isNewFilePanelOpen.value = true
+function handleNewFileClick() {
+  commandModel.value = { commandPath: 'create-file', isCommandOpen: true }
 }
 
-function handleFolderClick(path: string) {
+function handleNewFolderClick(path: string) {
+  commandModel.value = { commandPath: 'create-folder', isCommandOpen: true }
+}
+
+function handleFilesClick(path: string) {
   navigateTo(`/${path}`)
 }
 </script>
 
 <template>
   <div class="w-[250px] flex-none flex flex-col h-full overflow-none bg-altbackground py-2">
-    <CommandPanel :open="openNewFilePanel" />
+    <CommandPanel v-model="commandModel" />
     <div class="px-2 pb-2 border-b border-altborder h-10">
       <SidebarSwitcher :is-collapsed="isCollapsed" :accounts="accounts" />
     </div>
@@ -59,36 +64,22 @@ function handleFolderClick(path: string) {
       </PopoverContent>
     </Popover>
 
-    <Sheet v-model:open="isNewFilePanelOpen">
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent">
-          <div class="flex flex-row items-center justify-start w-full">
-            <DocumentPlusIcon class="size-4" />
-            <div class="pl-2 text-xs">New File</div>
-            <div class="flex-grow"></div>
-            <!--<CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm w-8">⌘N</CommandShortcut>-->
-          </div>
-        </Button>
-      </SheetTrigger>
-      <SheetContent class="h-full">
-        <Newfilepanel class="h-full" @close-sheet="isNewFilePanelOpen = false" />
-      </SheetContent>
-    </Sheet>
-    <Sheet v-model:open="openNewFolderPanel">
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent">
-          <div class=" flex flex-row items-center justify-start w-full">
-            <FolderPlusIcon class="size-4" />
-            <div class="pl-2 text-xs">New Folder</div>
-            <div class="flex-grow"></div>
-            <!--<CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm w-8">⌘F</CommandShortcut>-->
-          </div>
-        </Button>
-      </SheetTrigger>
-      <SheetContent class="h-full">
-        <Newfolderpanel class="h-full" @close-sheet="openNewFolderPanel = false" />
-      </SheetContent>
-    </Sheet>
+    <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click="handleNewFileClick">
+      <div class="flex flex-row items-center justify-start w-full">
+        <DocumentPlusIcon class="size-4" />
+        <div class="pl-2 text-xs">New File</div>
+        <div class="flex-grow"></div>
+        <!--<CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm w-8">⌘N</CommandShortcut>-->
+      </div>
+    </Button>
+    <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click="handleNewFolderClick">
+      <div class=" flex flex-row items-center justify-start w-full">
+        <FolderPlusIcon class="size-4" />
+        <div class="pl-2 text-xs">New Folder</div>
+        <div class="flex-grow"></div>
+        <!--<CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm w-8">⌘F</CommandShortcut>-->
+      </div>
+    </Button>
     <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent">
       <div class=" flex flex-row items-center justify-start w-full">
         <CalendarDaysIcon class="size-4" />
@@ -109,20 +100,21 @@ function handleFolderClick(path: string) {
     <Separator orientation="horizontal" class="mt-2 mb-2 bg-altborder" />
 
     <div class="w-full flex flex-col flex-grow">
-      <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click=" handleFolderClick('path')">
+      <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent"
+        :class="{ 'bg-accent': $route.path === '/path' }" @click=" handleFilesClick('path')">
         <div class="flex flex-row items-center justify-start w-full">
           <DocumentDuplicateIcon class="size-4" />
           <div class="pl-2 text-xs">Files</div>
         </div>
       </Button>
       <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click="
-        handleFolderClick('archive')">
+        handleFilesClick('archive')">
         <div class="flex flex-row items-center justify-start w-full">
           <ArchiveBoxIcon class="size-4" />
           <div class="pl-2 text-xs">Archive</div>
         </div>
       </Button>
-      <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click=" handleFolderClick('trash')">
+      <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click=" handleFilesClick('trash')">
         <div class="flex flex-row items-center justify-start w-full">
           <TrashIcon class="size-4" />
           <div class="pl-2 text-xs">Trash</div>

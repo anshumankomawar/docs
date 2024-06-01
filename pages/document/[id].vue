@@ -40,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex overflow-hidden">
+  <div class="h-full w-full flex overflow-hidden">
     <div class="flex-1 flex flex-col">
       <div v-if="fileContent !== null" class="flex-1 overflow-y-scroll pt-16 md:mx-16 lg:mx-36 pb-4">
         <TiptapEditor :initial-content="fileContent" :file-path="filePath" />
@@ -54,7 +54,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div class="w-[250px] bg-altbackground border-l border-altborder"></div>
+    <!--<div class="w-[250px] bg-altbackground border-l border-altborder"></div>-->
 
     <!--
     <Separator orientation="vertical" class="mt-24" />

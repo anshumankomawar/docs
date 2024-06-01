@@ -15,6 +15,9 @@ module.exports = {
 			},
 		},
 		extend: {
+			inset: {
+				"1/5": "20%",
+			},
 			keyframes: {
 				"collapsible-down": {
 					from: { height: 0 },
@@ -39,6 +42,7 @@ module.exports = {
 				altaccent: "hsl(var(--altaccent))",
 				altborder: "hsl(var(--altborder))",
 				bgcommand: "hsl(var(--bgcommand))",
+				alttext: "hsl(var(--alttext))",
 				primary: {
 					DEFAULT: "hsl(var(--primary))",
 					foreground: "hsl(var(--primary-foreground))",

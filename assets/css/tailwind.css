@@ -9,6 +9,7 @@
     --altbackground: 0, 0%, 98%;
     --altaccent: 240 4.8% 95.9%;
     --altborder: 240 5.9% 90%;
+    --alttext: 221, 4%, 37%;
     --bgcommand: 180, 100%, 100%;
 
     --muted: 240 4.8% 95.9%;
@@ -46,6 +47,7 @@
     --altbackground: 224, 7%, 15%;
     --altaccent: 214, 6%, 20%;
     --altborder: 224, 6%, 18%;
+    --alttext: 221, 4%, 64%;
     --bgcommand: 224, 7%, 15%;
 
     --muted: 240 3.7% 15.9%;

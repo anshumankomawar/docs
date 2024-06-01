@@ -60,9 +60,11 @@ const handleSaveShortcut = async (event) => {
 };
 
 onMounted(async () => {
+  window.addEventListener('keydown', handleSaveShortcut);
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleSaveShortcut);
 });
 </script>
 
