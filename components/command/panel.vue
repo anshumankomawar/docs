@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BellIcon, CalendarDaysIcon, SparklesIcon, Cog6ToothIcon, DocumentPlusIcon, FolderPlusIcon, MagnifyingGlassIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
+import { BellIcon, UserIcon, CalendarDaysIcon, SparklesIcon, Cog6ToothIcon, DocumentPlusIcon, FolderPlusIcon, MagnifyingGlassIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
 import { useMagicKeys } from '@vueuse/core'
 import { useCommandPanelStore } from '@/stores/commandpanel';
 
@@ -20,6 +20,14 @@ function handleCreateFolder() {
 function handleToggleTheme() {
   colorMode.value = colorMode.value === 'dark' ? 'light' : 'dark'
   store.updateIsCommandOpen(false)
+}
+
+function handleSettings() {
+  store.updateCommandPath('settings')
+}
+
+function handleAccount() {
+  store.updateCommandPath('account')
 }
 
 function lastCommand() {
@@ -80,9 +88,15 @@ watch(CmdN, (v) => {
               Create Folder
             </div>
           </CommandItem>
-          <CommandItem value="account-settings" class="text-xs">
+          <CommandItem value="settings" class="text-xs" @select="handleSettings">
             <div class="flex items-center gap-2">
               <Cog6ToothIcon class="size-4" />
+              Open settings
+            </div>
+          </CommandItem>
+          <CommandItem value="account" class="text-xs" @select="handleAccount">
+            <div class="flex items-center gap-2">
+              <UserIcon class="size-4" />
               Open account settings
             </div>
           </CommandItem>
@@ -119,6 +133,8 @@ watch(CmdN, (v) => {
         @created-file="store.isCommandOpen = false" />
       <DialogCreateFolder v-if="store.commandPath === 'create-folder'" @back-clicked="lastCommand"
         @created-folder="store.isCommandOpen = false" />
+      <DialogSettings v-if="store.commandPath === 'settings'" @back-clicked="lastCommand" />
+      <DialogAccount v-if="store.commandPath === 'account'" @back-clicked="lastCommand" />
     </div>
   </CommandDialog>
 </template>

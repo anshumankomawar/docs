@@ -29,7 +29,7 @@ function signinPopup() {
     console.error('Failed signinPopup', reason)
     error.value = reason
   }).then(() => {
-    navigateTo('/home')
+    navigateTo('/')
   })
 }
 </script>

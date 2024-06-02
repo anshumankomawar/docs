@@ -24,8 +24,18 @@ function handleNewFolderClick() {
   updateIsCommandOpen(true)
 }
 
-function handleFilesClick(path: string) {
+function handleFilesDialog(path: string) {
   navigateTo(`/${path}`)
+}
+
+function handleSettingsDialog() {
+  updateCommandPath('settings')
+  updateIsCommandOpen(true)
+}
+
+function handleAccountDialog() {
+  updateCommandPath('account')
+  updateIsCommandOpen(true)
 }
 </script>
 
@@ -100,22 +110,16 @@ function handleFilesClick(path: string) {
 
     <Separator orientation="horizontal" class="mt-2 mb-2 bg-altborder" />
 
-    <div class="w-full flex flex-col flex-grow">
+    <div class="w-full flex flex-col flex-grow space-y-1">
       <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent"
-        :class="{ 'bg-accent': $route.path === '/path' }" @click=" handleFilesClick('path')">
+        :class="{ 'bg-accent': $route.path === '/' }" @click=" handleFilesDialog('path')">
         <div class="flex flex-row items-center justify-start w-full">
           <DocumentDuplicateIcon class="size-4" />
           <div class="pl-2 text-xs">Files</div>
         </div>
       </Button>
-      <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click="
-        handleFilesClick('archive')">
-        <div class="flex flex-row items-center justify-start w-full">
-          <ArchiveBoxIcon class="size-4" />
-          <div class="pl-2 text-xs">Archive</div>
-        </div>
-      </Button>
-      <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click=" handleFilesClick('trash')">
+      <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent" @click=" handleFilesDialog('trash')"
+        :class="{ 'bg-accent': $route.path === '/trash' }">
         <div class="flex flex-row items-center justify-start w-full">
           <TrashIcon class="size-4" />
           <div class="pl-2 text-xs">Trash</div>
@@ -146,13 +150,13 @@ function handleFilesClick(path: string) {
       <Separator orientation="horizontal" class="mt-2 mb-2 bg-altborder" />
 
       <div class="flex flex-col w-full px-2">
-        <Button variant="ghost" size="xs" class="w-full rounded-md hover:bg-altaccent">
+        <Button variant="ghost" size="xs" class="w-full rounded-md hover:bg-altaccent" @click="handleSettingsDialog">
           <div class=" flex flex-row items-center justify-start w-full">
             <Cog6ToothIcon class="size-4" />
             <div class="pl-2 text-xs">Settings</div>
           </div>
         </Button>
-        <Button variant="ghost" size="xs" class="w-full rounded-md hover:bg-altaccent">
+        <Button variant="ghost" size="xs" class="w-full rounded-md hover:bg-altaccent" @click="handleAccountDialog">
           <div class=" flex flex-row items-center justify-start w-full">
             <UserIcon class="size-4" />
             <div class="pl-2 text-xs">Account</div>
