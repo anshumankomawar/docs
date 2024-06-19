@@ -25,14 +25,14 @@ const { fileContent, loading, error, fetchFileContent } = useFileContent();
 
 onMounted(() => {
   if (user.value) {
-    filePath.value = `${user.value.uid}/${route.params.id}`;
-    fetchFileContent(filePath.value);
+    filePath.value = `${route.params.id}`;
+    fetchFileContent(user.value.uid, filePath.value);
   } else {
     const unwatch = watch(user, (newUser) => {
       if (newUser) {
-        filePath.value = `${newUser.uid}/${route.params.id}`;
-        fetchFileContent(filePath.value);
-        unwatch(); // Stop watching after the user is set
+        filePath.value = `${route.params.id}`;
+        fetchFileContent(newUser.uid, filePath.value);
+        unwatch();
       }
     });
   }
@@ -42,15 +42,20 @@ onMounted(() => {
 <template>
   <div class="h-full w-full flex overflow-hidden">
     <div class="flex-1 flex flex-col">
-      <div v-if="fileContent !== null" class="flex-1 overflow-y-scroll pt-16 md:mx-16 lg:mx-36 pb-4">
-        <TiptapEditor :initial-content="fileContent" :file-path="filePath" />
-      </div>
-      <div v-else class="flex-1 h-full w-full px-8">
-        <div class="space-y-2 mt-24">
-          <Skeleton class="h-8 w-full" />
-          <Skeleton class="h-4 w-full" />
-          <Skeleton class="h-24 w-full" />
-          <Skeleton class="flex-1 w-full" />
+      <div class="w-full h-8 bg-altbackground border-b border-altborder"></div>
+      <div class="w-full h-full flex">
+        <div class="flex-0 overflow-y-scroll mt-8 md:ml-8 lg:ml-18 pb-4 px-4 w-3/4 min-w-3/4">
+          <TiptapEditor v-if="fileContent !== null" :initial-content="fileContent" :file-path="filePath" />
+          <div v-else class="space-y-2 mt-8">
+            <Skeleton class="w-36 h-12 mb-8" />
+            <Skeleton class="h-8 w-full" />
+            <Skeleton class="h-4 w-full" />
+            <Skeleton class="h-24 w-full" />
+            <Skeleton class="flex-1 w-full" />
+          </div>
+        </div>
+        <div class="flex-1 max-w-1/4 bg-altbackground border-l border-altborder ml-4 py-16 px-4">
+          <div>asdf</div>
         </div>
       </div>
     </div>

@@ -89,7 +89,7 @@ async function handleDeleteFile(id: String) {
     <div v-for="subfolder in folder.subfolders" :key="subfolder.id" @click="handleSelectFolder(subfolder, index)">
       <ContextMenu>
         <ContextMenuTrigger>
-          <Button variant="ghost" size="xs" class="w-full rounded-md h-8 max-h-8"
+          <Button variant="ghost" size="xs" class="w-full rounded-md h-7 max-h-7 mb-1"
             :class="{ 'bg-accent': store.path.slice(1).at(index) === subfolder.name }">
             <div class="flex flex-row items-center justify-start w-full">
               <FolderIcon class="size-4" />
@@ -107,7 +107,7 @@ async function handleDeleteFile(id: String) {
     <div v-for="file in folder.files" :key="file.id" @click="navigateTo(`/document/${file.id}`)">
       <ContextMenu>
         <ContextMenuTrigger>
-          <Button variant="ghost" size="xs" class="w-full rounded-md hover:underline">
+          <Button variant="ghost" size="xs" class="w-full rounded-md hover:underline h-7 max-h-7 mb-1">
             <div class="flex flex-row items-center justify-start w-full">
               <DocumentTextIcon class="size-4" />
               <div class="pl-2 text-xs">{{ file.name }}</div>

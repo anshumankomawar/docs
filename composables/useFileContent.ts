@@ -1,27 +1,27 @@
 import { ref } from "vue";
-import { getDownloadURL, ref as storageRef } from "firebase/storage";
+import { doc, collection, updateDoc, setDoc, getDoc } from "firebase/firestore";
 
 export const useFileContent = () => {
 	const fileContent = ref<string | null>(null);
 	const loading = ref<boolean>(false);
 	const error = ref<string | null>(null);
+	const user = useCurrentUser();
+	const db = useFirestore();
 
-	const fetchFileContent = async (filePath: string) => {
+	const fetchFileContent = async (userId: string, fileId: string) => {
 		loading.value = true;
 		error.value = null;
 
 		try {
-			const storage = useFirebaseStorage();
-			const fileRef = storageRef(storage, filePath);
-			const url = await getDownloadURL(fileRef);
+			const file = await getDoc(
+				doc(collection(db, "users", userId, "files"), fileId),
+			);
 
-			const response = await fetch(url);
-			const blob = await response.blob();
-			if (!response.ok) {
-				throw new Error("Network response was not ok");
+			if (!file.exists()) {
+				throw new Error("File not found");
 			}
-			const text = await blob.text();
-			fileContent.value = text;
+
+			fileContent.value = file.data().content;
 		} catch (err) {
 			error.value = (err as Error).message;
 		} finally {
@@ -29,10 +29,17 @@ export const useFileContent = () => {
 		}
 	};
 
+	const saveFileContent = (fileId: string, content: string) => {
+		updateDoc(doc(collection(db, "users", user.value!.uid, "files"), fileId), {
+			content: content,
+		});
+	};
+
 	return {
 		fileContent,
 		loading,
 		error,
 		fetchFileContent,
+		saveFileContent,
 	};
 };

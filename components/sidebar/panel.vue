@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CommandLineIcon, UserIcon, CalendarDaysIcon, DocumentDuplicateIcon, DocumentPlusIcon, FolderPlusIcon, MagnifyingGlassIcon, FolderIcon, ArchiveBoxIcon, TrashIcon, Cog6ToothIcon, QuestionMarkCircleIcon, MoonIcon, BellIcon } from '@heroicons/vue/24/outline'
+import { CommandLineIcon, UserIcon, CalendarDaysIcon, DocumentDuplicateIcon, DocumentPlusIcon, FolderPlusIcon, MagnifyingGlassIcon, FolderIcon, ArchiveBoxIcon, TrashIcon, Cog6ToothIcon, QuestionMarkCircleIcon, MoonIcon, BellIcon, SunIcon } from '@heroicons/vue/24/outline'
 import { useCommandPanelStore } from '~/stores/commandpanel';
 const accounts = [
   {
@@ -57,7 +57,7 @@ function handleAccountDialog() {
         <CommandShortcut class="border px-1 mr-1 rounded-md size-5 text-center">/</CommandShortcut>
       </div>
     </div>
-    <Popover v-model:open="isNotificationsOpen">
+    <Popover :modal="true" v-model:open="isNotificationsOpen">
       <PopoverTrigger asChild>
         <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent mt-2"
           :class="{ 'bg-accent': isNotificationsOpen }">
@@ -91,28 +91,11 @@ function handleAccountDialog() {
         <!--<CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm w-8">⌘F</CommandShortcut>-->
       </div>
     </Button>
-    <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent">
-      <div class=" flex flex-row items-center justify-start w-full">
-        <CalendarDaysIcon class="size-4" />
-        <div class="pl-2 text-xs">Recent Docs</div>
-        <div class="flex-grow"></div>
-        <!--<CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm w-8">⌘R</CommandShortcut>-->
-      </div>
-    </Button>
-    <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent">
-      <div class=" flex flex-row items-center justify-start w-full">
-        <MagnifyingGlassIcon class="size-4" />
-        <div class="pl-2 text-xs">Search</div>
-        <div class="flex-grow"></div>
-        <!--<CommandShortcut class="bg-accent px-1 py-0.5 rounded-sm w-8">⌘S</CommandShortcut>-->
-      </div>
-    </Button>
-
-    <Separator orientation="horizontal" class="mt-2 mb-2 bg-altborder" />
+    <Separator orientation="horizontal" class="mt-3 mb-2 bg-altborder" />
 
     <div class="w-full flex flex-col flex-grow space-y-1">
       <Button variant="ghost" size="xs" class="rounded-md mx-2 hover:bg-altaccent"
-        :class="{ 'bg-accent': $route.path === '/' }" @click=" handleFilesDialog('path')">
+        :class="{ 'bg-accent': $route.path === '/' }" @click=" handleFilesDialog('')">
         <div class="flex flex-row items-center justify-start w-full">
           <DocumentDuplicateIcon class="size-4" />
           <div class="pl-2 text-xs">Files</div>
@@ -168,13 +151,34 @@ function handleAccountDialog() {
             <div class="pl-2 text-xs">Help</div>
           </div>
         </Button>
-        <Button variant="ghost" size="xs" class="w-full rounded-md hover:bg-altaccent"
-          @click=" colorMode.preference = colorMode.value === 'light' ? 'dark' : 'light'">
-          <div class=" flex flex-row items-center justify-start w-full">
-            <MoonIcon class="size-4" />
-            <div class="pl-2 text-xs">Theme</div>
-          </div>
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="xs" class="w-full rounded-md hover:bg-altaccent">
+              <div class=" flex flex-row items-center justify-start w-full">
+                <MoonIcon class="size-4" />
+                <div class="pl-2 text-xs">Theme</div>
+              </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent class="ml-2 mb-2 p-1 w-min bg-altbackground border-altborder">
+            <div class="flex flex-col w-min">
+              <Button variant="ghost" size="xs" class="rounded-md hover:bg-altaccent"
+                @click=" colorMode.preference = 'light'">
+                <div class=" flex flex-row items-center justify-start w-full">
+                  <SunIcon class="size-4" />
+                  <div class="pl-2 text-xs">Light Mode</div>
+                </div>
+              </Button>
+              <Button variant="ghost" size="xs" class="rounded-md hover:bg-altaccent"
+                @click=" colorMode.preference = 'dark'">
+                <div class=" flex flex-row items-center justify-start w-full">
+                  <MoonIcon class="size-4" />
+                  <div class="pl-2 text-xs">Dark Mode</div>
+                </div>
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   </div>

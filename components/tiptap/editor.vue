@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/vue-3'
-import { ref as storageRef, uploadString } from 'firebase/storage'
 import StarterKit from '@tiptap/starter-kit'
 import Document from '@tiptap/extension-document'
 import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
-const storage = useFirebaseStorage()
+
+const { saveFileContent } = useFileContent();
 
 const CustomDocument = Document.extend({
   content: 'block*',
@@ -43,24 +43,44 @@ const editor = useEditor({
   ],
 })
 
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return function (...args: Parameters<T>) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
 const handleSaveShortcut = async (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key === 's') {
     event.preventDefault();
     if (!editor.value) return;
+
     const htmlToSave = editor.value.getHTML();
     if (!htmlToSave) return;
 
     console.log('Saving file...', props.filePath);
-    await uploadString(storageRef(storage, props.filePath), htmlToSave).then(() => {
-      console.log('File saved');
-    }).catch((error) => {
-      console.error('Error saving file:', error);
-    });
+
+    saveFileContent(props.filePath, htmlToSave);
   }
 };
 
+const debouncedSave = debounce(async (htmlToSave: string) => {
+  if (htmlToSave) {
+    console.log('Auto-saving file...', props.filePath);
+    saveFileContent(props.filePath, htmlToSave);
+  }
+}, 3000); // 2000ms = 2 seconds
+
 onMounted(async () => {
   window.addEventListener('keydown', handleSaveShortcut);
+
+  if (editor.value) {
+    editor.value.on('update', () => {
+      const htmlToSave = editor.value.getHTML();
+      debouncedSave(htmlToSave);
+    });
+  }
 });
 
 onBeforeUnmount(() => {

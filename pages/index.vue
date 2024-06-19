@@ -102,7 +102,7 @@ function handleNewFolder(path: string) {
   <div class="w-full h-full overflow-x-hidden">
     <div class="flex h-full overflow-x-scroll">
       <ContextMenu v-for="(folder, index) in columns" :key="index">
-        <ContextMenuTrigger class="border-r min-w-[200px] px-2 pt-2" @click="handleColumnClick(index)">
+        <ContextMenuTrigger class="border-r min-w-[200px] px-2 pt-2.5" @click="handleColumnClick(index)">
           <Folder :folder="folder" :handleSelectFolder="handleSelectFolder" :index="index"
             @delete-folder="handleDeleteFolder(index)" />
         </ContextMenuTrigger>
