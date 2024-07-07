@@ -24,3 +24,5 @@ logs
 !.env.example
 
 service-account.json
+
+docs-api/
