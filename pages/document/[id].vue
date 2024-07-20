@@ -41,24 +41,7 @@ onMounted(() => {
 
 <template>
   <div class="h-full w-full flex overflow-hidden">
-    <div class="flex-1 flex flex-col">
-      <div class="w-full h-8 bg-altbackground border-b border-altborder"></div>
-      <div class="w-full h-full flex">
-        <div class="flex-0 overflow-y-scroll mt-8 md:ml-8 lg:ml-18 pb-4 px-4 w-3/4 min-w-3/4">
-          <TiptapEditor v-if="fileContent !== null" :initial-content="fileContent" :file-path="filePath" />
-          <div v-else class="space-y-2 mt-8">
-            <Skeleton class="w-36 h-12 mb-8" />
-            <Skeleton class="h-8 w-full" />
-            <Skeleton class="h-4 w-full" />
-            <Skeleton class="h-24 w-full" />
-            <Skeleton class="flex-1 w-full" />
-          </div>
-        </div>
-        <div class="flex-1 max-w-1/4 bg-altbackground border-l border-altborder ml-4 py-16 px-4">
-          <div>asdf</div>
-        </div>
-      </div>
-    </div>
+    <TiptapEditor v-if="fileContent !== null" :initial-content="fileContent" :file-path="filePath" />
     <!--<div class="w-[250px] bg-altbackground border-l border-altborder"></div>-->
 
     <!--
