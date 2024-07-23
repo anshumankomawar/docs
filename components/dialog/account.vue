@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ChevronLeftIcon, UserIcon } from '@heroicons/vue/24/outline';
-import { signOut } from 'firebase/auth'
 import { Button } from '@/components/ui/button'
 import {
   useCurrentUser,
@@ -10,17 +9,23 @@ import {
 import { useSubscriptionStore } from '~/stores/subscriptions';
 
 const auth = useFirebaseAuth()!;
+const { logout } = useAuth();
 const user = useCurrentUser()
 const subscribtions = useSubscriptionStore()
 const isUserLoaded = useIsCurrentUserLoaded()
 const firstName = ref<string>('')
 const lastName = ref<string>('')
 const email = ref<string>('')
+const store = useCommandPanelStore()
+const { resetPath } = usePathStore()
 
 async function signOutAndNavigate(auth: any) {
   subscribtions.unsubscribeAll();
-  await signOut(auth);
-  navigateTo('/login')
+  logout();
+  resetPath();
+  await navigateTo('/login')
+  store.updateIsCommandOpen(false)
+  store.updateCommandPath('')
 }
 
 onMounted(() => {

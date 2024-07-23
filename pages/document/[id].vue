@@ -17,7 +17,7 @@ const tags = ['Vue.js', 'JavaScript', 'Tailwind CSS', 'Firebase', 'Node.js', 'HT
 
 const route = useRoute()
 const user = useCurrentUser();
-const store = useFileTreeStore();
+const store = usePathStore();
 const displayPath = store.path.slice(1).join('/') + '/mobydick.txt'
 const filePath = ref('');
 

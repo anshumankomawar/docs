@@ -12,7 +12,7 @@ defineProps({
 const user = useCurrentUser()
 const db = useFirestore()
 const storage = useFirebaseStorage()
-const store = useFileTreeStore();
+const store = usePathStore();
 
 const emit = defineEmits(['delete-folder']);
 

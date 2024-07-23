@@ -1,101 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { usePathStore } from '@/stores/path';
 import { useFileTreeStore } from '@/stores/filetree';
-import { useCommandPanelStore } from '@/stores/commandpanel';
-import { useSubscriptionStore } from '~/stores/subscriptions';
 
-interface Folder {
-  id: string;
-  name: string;
-  path: string;
-  subfolders: Folder[];
-}
-
-const commandPanelStore = useCommandPanelStore();
+const pathStore = usePathStore();
 const filetreeStore = useFileTreeStore();
-const subscriptionStore = useSubscriptionStore();
-filetreeStore.$subscribe(() => {
-  filetreeStore.saveToLocalStorage();
+const isLoading = computed(() => filetreeStore.isLoading);
+const columns = computed(() => filetreeStore.columns);
+const { handleSelectFolder, handleNewFile, handleNewFolder, handleDeleteFolder, handleColumnClick } = filetreeStore;
+
+pathStore.$subscribe(() => {
+  pathStore.saveToLocalStorage();
 });
-const user = useCurrentUser();
-const db = useFirestore();
-const tree = ref<Folder[]>([]);
-const columns = ref<Folder[]>([]);
-const folders = ref<any[]>([]);
-const files = ref<any[]>([]);
 
-const loadColumns = (pathArray: string[]) => {
-  columns.value = [tree.value[0]];
-  let currentLevel = tree.value[0].subfolders;
-
-  pathArray.forEach(segment => {
-    const nextFolder = currentLevel.find(folder => folder.name === segment);
-    if (nextFolder) {
-      currentLevel = nextFolder.subfolders;
-      columns.value.push(nextFolder);
-    }
-  });
-};
-
-const handleSelectFolder = (subfolder: Folder, index: number) => {
-  filetreeStore.path = filetreeStore.path.slice(0, index + 1).concat(subfolder.name);
-  columns.value = columns.value.slice(0, index + 1).concat(subfolder);
-};
-
-const handleColumnClick = (index: number) => {
-  columns.value = columns.value.slice(0, index + 1);
-  filetreeStore.path = filetreeStore.path.slice(0, index + 1);
-};
-
-const handleDeleteFolder = (index: number) => {
-  columns.value = columns.value.slice(0, index + 1);
-  filetreeStore.path = filetreeStore.path.slice(0, index + 1);
-}
-
-const updateTree = () => {
-  if (folders.value.length || files.value.length) {
-    tree.value = generateTree({ folders: folders.value, files: files.value });
-    loadColumns(filetreeStore.path.slice(1));
-  }
-};
+onMounted(async () => {
+  await filetreeStore.fetchFileTree();
+});
 
 onBeforeMount(() => {
-  filetreeStore.loadFromLocalStorage();
+  pathStore.loadFromLocalStorage();
 });
-
-onMounted(() => {
-  if (user.value) {
-    const foldersQuery = query(collection(db, 'users', user.value.uid, 'folders'));
-    subscriptionStore.addSubscription('folders', onSnapshot(foldersQuery, (snapshot) => {
-      folders.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      updateTree();
-    }));
-
-    const filesQuery = query(collection(db, 'users', user.value.uid, 'files'));
-    subscriptionStore.addSubscription('files', onSnapshot(filesQuery, (snapshot) => {
-      files.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      updateTree();
-    }));
-  }
-});
-
-onBeforeUnmount(() => {
-  subscriptionStore.unsubscribe('folders');
-  subscriptionStore.unsubscribe('files');
-});
-
-function handleNewFile(path: string) {
-  filetreeStore.selectedPath = path;
-  commandPanelStore.updateCommandPath('create-file');
-  commandPanelStore.updateIsCommandOpen(true);
-}
-
-function handleNewFolder(path: string) {
-  filetreeStore.selectedPath = path;
-  commandPanelStore.updateCommandPath('create-folder');
-  commandPanelStore.updateIsCommandOpen(true);
-}
 </script>
 
 <template>
@@ -108,7 +31,7 @@ function handleNewFolder(path: string) {
         </ContextMenuTrigger>
         <ContextMenuContent class="bg-background border-altborder">
           <ContextMenuItem @select="handleNewFile(folder.path)">New File</ContextMenuItem>
-          <ContextMenuItem @select="handleNewFolder(folder.path)">NewFolder</ContextMenuItem>
+          <ContextMenuItem @select="handleNewFolder(folder.path)">New Folder</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
     </div>

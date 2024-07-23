@@ -3,19 +3,19 @@ export const generateTree = ({ folders, files }) => {
 	const fileMap = {};
 
 	folders.forEach((folder) => {
-		folderMap[folder.id] = { ...folder, subfolders: [], files: [] };
+		folderMap[folder.path] = { ...folder, subfolders: [], files: [] };
 	});
 
 	files.forEach((file) => {
-		if (!fileMap[file.parentId]) {
-			fileMap[file.parentId] = [];
+		if (!fileMap[file.parent]) {
+			fileMap[file.parent] = [];
 		}
-		fileMap[file.parentId].push(file);
+		fileMap[file.parent].push(file);
 	});
 
 	folders.forEach((folder) => {
-		if (folder.parentId && folderMap[folder.parentId]) {
-			folderMap[folder.parentId].subfolders.push(folderMap[folder.id]);
+		if (folder.parent && folderMap[folder.parent]) {
+			folderMap[folder.parent].subfolders.push(folderMap[folder.path]);
 		}
 	});
 
@@ -27,5 +27,5 @@ export const generateTree = ({ folders, files }) => {
 
 	const rootFolders = folders.filter((folder) => !folder.parentId);
 
-	return rootFolders.map((folder) => folderMap[folder.id]);
+	return rootFolders.map((folder) => folderMap[folder.path]);
 };

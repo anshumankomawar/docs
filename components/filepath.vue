@@ -7,9 +7,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { useFileTreeStore } from '@/stores/filetree';
+import { usePathStore } from '@/stores/path';
 
-const store = useFileTreeStore();
+const store = usePathStore();
 </script>
 
 <template>

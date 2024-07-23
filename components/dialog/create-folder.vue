@@ -1,57 +1,47 @@
 <script setup lang="ts">
 import { ChevronLeftIcon, FolderIcon } from '@heroicons/vue/24/outline';
-import { collection, query, where, addDoc } from 'firebase/firestore'
 import { useFocus } from '@vueuse/core'
 
 const emit = defineEmits(['created-folder', 'back-clicked']);
 
 const user = useCurrentUser()
 const db = useFirestore()
-const fileTreeStore = useFileTreeStore()
+const pathStore = usePathStore()
 const tags = ref([])
 const path = ref<string>('')
 const name = ref<string>('')
 
-const folderQuery = computed(() => {
-  if (!user.value) return null;
-  return query(
-    collection(db, 'users', user.value.uid, 'folders'),
-    where('path', '==', path.value)
-  );
-});
-
-const folders = useCollection(folderQuery);
+const filetreeStore = useFileTreeStore();
 
 const createFolder = async () => {
-  if (!user.value || name.value === '') return;
-
-  try {
-    const folderData = folders.value[0];
-    const folderPath = path.value === "/" ? `/${name.value}` : `${path.value}/${name.value}`;
-
-    await addDoc(collection(db, 'users', user.value.uid, 'folders'), {
+  if (name.value === '') return;
+  await useFetch('http://localhost:4321/folder', {
+    method: 'POST',
+    $fetch: useRequestFetch(),
+    credentials: 'include',
+    body: JSON.stringify({
       name: name.value,
-      children: [],
-      parentId: folderData.id,
-      path: folderPath,
-    });
-
-    console.log('Folder successfully written!');
+      path: path.value + name.value + "/",
+      parent: path.value,
+    }),
+  }).then((res) => {
+    console.log('Finished creating folder...');
+    filetreeStore.fetchFileTree();
     emit('created-folder');
-  } catch (error) {
+  }).catch((error) => {
     console.error('Error writing document: ', error);
-  }
+  });
 }
 
 const filenameInput = ref(null);
 useFocus(filenameInput, { initialValue: true })
 
 onMounted(async () => {
-  if (fileTreeStore.selectedPath !== '') {
-    path.value = fileTreeStore.selectedPath;
-    fileTreeStore.selectedPath = '';
+  if (pathStore.selectedPath !== '') {
+    path.value = pathStore.selectedPath;
+    pathStore.selectedPath = '';
   } else {
-    path.value = "/" + useFileTreeStore().path.slice(1).join('/');
+    path.value = "/" + usePathStore().path.slice(1).join('/');
   }
 })
 </script>

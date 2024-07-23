@@ -1,9 +1,10 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-	const user = await getCurrentUser!();
+	if (import.meta.client) return;
+	const isLoggedIn = useCookie("Session").value === "valid";
 
-	if (!user && to.path !== "/login") {
+	if (!isLoggedIn && to.path !== "/login") {
 		return navigateTo({ path: "/login" });
-	} else if (user && (to.path === "/login" || to.path === "/register")) {
+	} else if (isLoggedIn && (to.path === "/login" || to.path === "/register")) {
 		return navigateTo({ path: "/" });
 	}
 });
