@@ -4,7 +4,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { useFileTreeStore } from '@/stores/filetree';
@@ -18,7 +17,11 @@ const store = useFileTreeStore();
       <BreadcrumbList>
         <template v-for="(item, index) in store.path" :key="index">
           <BreadcrumbItem>
-            <BreadcrumbLink :href="item.link" class="text-xs"
+            <BreadcrumbLink v-if="index === 0" :href="item.link" class="text-xs"
+              :class="{ 'dark:text-white text-black': index === store.path.length - 1 }">
+              Home
+            </BreadcrumbLink>
+            <BreadcrumbLink v-else :href="item.link" class="text-xs"
               :class="{ 'dark:text-white text-black': index === store.path.length - 1 }">
               {{ item }}
             </BreadcrumbLink>

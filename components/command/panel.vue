@@ -53,7 +53,6 @@ watch(CmdN, (v) => {
     store.updateIsCommandOpen(true)
   }
 })
-
 </script>
 
 <template>

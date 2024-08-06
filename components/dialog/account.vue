@@ -1,34 +1,20 @@
 <script setup lang="ts">
 import { ChevronLeftIcon, UserIcon } from '@heroicons/vue/24/outline';
-import { signOut } from 'firebase/auth'
 import { Button } from '@/components/ui/button'
-import {
-  useCurrentUser,
-  useFirebaseAuth,
-  useIsCurrentUserLoaded,
-} from 'vuefire'
-import { useSubscriptionStore } from '~/stores/subscriptions';
 
-const auth = useFirebaseAuth()!;
-const user = useCurrentUser()
-const subscribtions = useSubscriptionStore()
-const isUserLoaded = useIsCurrentUserLoaded()
-const firstName = ref<string>('')
-const lastName = ref<string>('')
-const email = ref<string>('')
+const client = useSupabaseClient()
+const user = useSupabaseUser()
+const ftStore = useFileTreeStore()
 
-async function signOutAndNavigate(auth: any) {
-  subscribtions.unsubscribeAll();
-  await signOut(auth);
+async function signOutAndNavigate() {
+  const user_id = user.value.id;
+  await client.auth.signOut();
+  ftStore.resetPath(user_id);
   navigateTo('/login')
 }
 
-onMounted(() => {
-  if (user.value) {
-    firstName.value = user.value.displayName.split(' ')[0]
-    lastName.value = user.value.displayName.split(' ')[1]
-    email.value = user.value.email
-  }
+const { data } = await useAsyncData('user', async () => {
+  return await client.from('users').select('*').eq('id', user.value.id).single()
 })
 </script>
 
@@ -44,19 +30,13 @@ onMounted(() => {
   <div class="px-2 space-y-4 overflow-y-scroll">
     <div class="grid items-center gap-1.5 ">
       <Label for="text" class="text-xs ml-1">First Name</Label>
-      <Input id="firstname" v-model="firstName" type="text" class="border-altborder bg-background" />
+      <Input id="firstname" v-model="data.data.first_name" type="text" class="border-altborder bg-background" />
     </div>
     <div class="grid items-center gap-1.5 ">
       <Label for="text" class="text-xs ml-1">Last Name</Label>
-      <Input id="lastname" v-model="lastName" type="text" class="border-altborder bg-background" />
+      <Input id="lastname" v-model="data.data.last_name" type="text" class="border-altborder bg-background" />
     </div>
-    <div class="grid items-center gap-1.5 ">
-      <Label for="email" class="text-xs ml-1">Email</Label>
-      <Input id="email" v-model="email" type="email" class="border-altborder bg-background" />
-    </div>
-
-    <Button class="w-full bg-violet-700 hover:bg-violet-600 text-white" variant="default"
-      @click="signOutAndNavigate(auth)">
+    <Button class="w-full bg-violet-700 hover:bg-violet-600 text-white" variant="default" @click="signOutAndNavigate()">
       Sign Out</Button>
   </div>
 </template>

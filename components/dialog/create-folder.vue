@@ -1,45 +1,29 @@
 <script setup lang="ts">
 import { ChevronLeftIcon, FolderIcon } from '@heroicons/vue/24/outline';
-import { collection, query, where, addDoc } from 'firebase/firestore'
 import { useFocus } from '@vueuse/core'
 
 const emit = defineEmits(['created-folder', 'back-clicked']);
 
-const user = useCurrentUser()
-const db = useFirestore()
+const user = useSupabaseUser()
+const client = useSupabaseClient()
 const fileTreeStore = useFileTreeStore()
 const tags = ref([])
 const path = ref<string>('')
 const name = ref<string>('')
 
-const folderQuery = computed(() => {
-  if (!user.value) return null;
-  return query(
-    collection(db, 'users', user.value.uid, 'folders'),
-    where('path', '==', path.value)
-  );
-});
-
-const folders = useCollection(folderQuery);
-
 const createFolder = async () => {
-  if (!user.value || name.value === '') return;
-
   try {
-    const folderData = folders.value[0];
-    const folderPath = path.value === "/" ? `/${name.value}` : `${path.value}/${name.value}`;
-
-    await addDoc(collection(db, 'users', user.value.uid, 'folders'), {
+    await client.from('inodes').insert({
+      path: `${path.value}${name.value}/`,
       name: name.value,
-      children: [],
-      parentId: folderData.id,
-      path: folderPath,
+      parent_path: path.value,
+      user_id: user.value.id,
+      resource_type: 'folder',
     });
-
-    console.log('Folder successfully written!');
-    emit('created-folder');
   } catch (error) {
     console.error('Error writing document: ', error);
+  } finally {
+    emit('created-folder');
   }
 }
 
@@ -68,7 +52,7 @@ onMounted(async () => {
   <div class="px-2 space-y-4 overflow-y-scroll">
     <div class="grid items-center gap-1.5 ">
       <Label for="email" class="text-xs ml-1">Path</Label>
-      <Input id="path" class="border-altborder bg-background" v-model="path" type="email" placeholder="/" />
+      <Input id="path" class="border-altborder bg-background" v-model="path" type="email" placeholder="/" disabled />
     </div>
     <div class="grid items-center gap-1.5 ">
       <Label for="email" class="text-xs ml-1">Folder Name</Label>

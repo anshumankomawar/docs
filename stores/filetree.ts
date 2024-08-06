@@ -1,8 +1,9 @@
 export const useFileTreeStore = defineStore("filetree", {
 	state: () => {
 		return {
-			path: ["Home"],
+			path: [useSupabaseUser().value?.id + "/"],
 			selectedPath: "",
+			selectedInode: {},
 		};
 	},
 	actions: {
@@ -13,6 +14,10 @@ export const useFileTreeStore = defineStore("filetree", {
 			}
 		},
 		saveToLocalStorage() {
+			localStorage.setItem("filetree-path", JSON.stringify(this.path));
+		},
+		resetPath(user_id: string) {
+			this.path = [user_id + "/"];
 			localStorage.setItem("filetree-path", JSON.stringify(this.path));
 		},
 	},

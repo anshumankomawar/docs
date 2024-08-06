@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import Document from '@tiptap/extension-document'
 import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
@@ -25,12 +24,15 @@ lowlight.register('css', css)
 lowlight.register('js', js)
 lowlight.register('ts', ts)
 
-const { saveFileContent } = useFileContent();
+const client = useSupabaseClient()
+const user = useSupabaseUser()
 
 const props = defineProps<{
   initialContent: string,
   filePath: string
 }>()
+
+const displaypath = props.filePath.split('/').slice(1);
 
 const editor = useEditor({
   content: props.initialContent,
@@ -75,30 +77,42 @@ function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (.
   };
 }
 
+async function save(htmlToSave: string) {
+  if (htmlToSave) {
+    const { error } = await client
+      .from('versions')
+      .update({ content: htmlToSave })
+      .eq('inode_path', props.filePath)
+      .eq('version_number', 0)
+      .eq('user_id', user.value.id)
+
+    if (error) {
+      console.error('Error saving file: ', error);
+    } else {
+      console.log('File saved successfully');
+    }
+  }
+}
+
 const handleSaveShortcut = async (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key === 's') {
     event.preventDefault();
     if (!editor.value) return;
 
     const htmlToSave = editor.value.getHTML();
-    if (!htmlToSave) return;
-
     console.log('Saving file...', props.filePath);
-
-    saveFileContent(props.filePath, htmlToSave);
+    save(htmlToSave);
   }
 };
 
 const debouncedSave = debounce(async (htmlToSave: string) => {
-  if (htmlToSave) {
-    console.log('Auto-saving file...', props.filePath);
-    saveFileContent(props.filePath, htmlToSave);
-  }
-}, 3000); // 2000ms = 2 seconds
+  console.log('Saving file...', props.filePath);
+  save(htmlToSave);
+}, 3000);
 
 onMounted(async () => {
   window.addEventListener('keydown', handleSaveShortcut);
-  editor.value.commands.focus('end')
+  editor.value.commands.focus('start')
 
   if (editor.value) {
     editor.value.on('update', () => {
@@ -114,56 +128,51 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col">
+  <div class="flex-0 flex flex-col w-full justify-center items-center">
     <div v-if="editor" class="w-full h-16 px-6 py-6 border-b flex items-center">
       <ChevronLeftIcon class="size-4 mr-4 cursor-pointer" @click="navigateTo('/')" />
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem class="text-xs">
-            <BreadcrumbLink class="flex items-center text-xs">
-              <FolderIcon class="size-4 mr-2" />
-              Design Docs
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-          </BreadcrumbSeparator>
-          <BreadcrumbItem class="text-xs text-foreground">
-            <BreadcrumbLink class="flex items-center text-xs">
-              <DocumentIcon class="size-4 mr-1" />
-              Gizmo Throttling
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+          <template v-for="(item, index) in displaypath" :key="index">
+            <BreadcrumbItem>
+              <BreadcrumbLink class="text-xs hover:text-none"
+                :class="{ 'dark:text-white text-black': index === displaypath.length - 1 }">
+                {{ item }}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator v-if="index < displaypath.length - 1" />
+          </template>
         </BreadcrumbList>
       </Breadcrumb>
       <div class="flex-grow"></div>
       <ClockIcon class="size-4 mr-2 ml-auto cursor-pointer" />
       <ShareIcon class="size-4 ml-auto cursor-pointer" />
     </div>
-    <div v-if="editor" class="w-full h-9 py-1 flex items-center justify-center border-b ">
+    <div v-if="editor" class="w-full h-10 py-1 flex items-center justify-center border-b ">
       <div class="h-full flex items-center justify-start space-x-1">
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle bold" @click="editor.chain().focus().toggleBold().run()"
           :class="{ 'bg-accent': editor.isActive('bold') }" asChild>
-          <BoldIcon class="size-3 text-white" />
+          <BoldIcon class="size-3 dark:text-white" />
         </div>
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle italic" @click="editor.chain().focus().toggleItalic().run()"
           :class="{ 'bg-accent': editor.isActive('italic') }" asChild>
-          <ItalicIcon class="size-3 text-white" />
+          <ItalicIcon class="size-3 dark:text-white" />
         </div>
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle underline" @click="editor.chain().focus().toggleUnderline().run()"
           :class="{ 'bg-accent': editor.isActive('underline') }" asChild>
-          <UnderlineIcon class="size-3 text-white" />
+          <UnderlineIcon class="size-3 dark:text-white" />
         </div>
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle strikethrough" @click="editor.chain().focus().toggleStrike().run()"
           :class="{ 'bg-accent': editor.isActive('strike') }" asChild>
-          <StrikethroughIcon class="size-3 text-white" />
+          <StrikethroughIcon class="size-3 dark:text-white" />
         </div>
         <div class="h-full py-1">
           <Separator orientation="vertical" />
@@ -172,19 +181,19 @@ onBeforeUnmount(() => {
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle strikethrough" @click="editor.chain().focus().setTextAlign('left').run()"
           :class="{ 'bg-accent': editor.isActive({ textAlign: 'left' }) }" asChild>
-          <TextAlignLeftIcon class="size-3 text-white" />
+          <TextAlignLeftIcon class="size-3 dark:text-white" />
         </div>
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle strikethrough" @click="editor.chain().focus().setTextAlign('center').run()"
           :class="{ 'bg-accent': editor.isActive({ textAlign: 'center' }) }" asChild>
-          <TextAlignCenterIcon class="size-3 text-white" />
+          <TextAlignCenterIcon class="size-3 dark:text-white" />
         </div>
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle strikethrough" @click="editor.chain().focus().setTextAlign('right').run()"
           :class="{ 'bg-accent': editor.isActive({ textAlign: 'right' }) }" asChild>
-          <TextAlignRightIcon class="size-3 text-white" />
+          <TextAlignRightIcon class="size-3 dark:text-white" />
         </div>
         <div class="h-full py-1">
           <Separator orientation="vertical" />
@@ -193,40 +202,38 @@ onBeforeUnmount(() => {
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle strikethrough" @click="editor.chain().focus().toggleBlockquote().run()"
           :class="{ 'bg-accent': editor.isActive('blockquote') }" asChild>
-          <ChatBubbleBottomCenterIcon class="size-3 text-white" />
+          <ChatBubbleBottomCenterIcon class="size-3 dark:text-white" />
         </div>
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle strikethrough" @click="editor.chain().focus().toggleCodeBlock().run()"
           :class="{ 'bg-accent': editor.isActive('codeBlock') }" asChild>
-          <CodeBracketIcon class="size-3 text-white" />
+          <CodeBracketIcon class="size-3 dark:text-white" />
         </div>
         <div
           class="h-6 px-2 hover:cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground"
           variant="ghost" aria-label="Toggle strikethrough" @click="editor.chain().focus().toggleBulletList().run()"
           :class="{ 'bg-accent': editor.isActive('bulletList') }" asChild>
-          <ListBulletIcon class="size-3 text-white" />
+          <ListBulletIcon class="size-3 dark:text-white" />
         </div>
       </div>
     </div>
-    <div class="w-full h-full flex justify-center">
-      <div class="flex-0 overflow-y-scroll pb-4 px-4 w-4/5 ">
-        <div v-if="editor" class="h-full">
-          <editor-content :editor="editor" class="h-full overflow-y-scroll pt-8 flex-grow max-w-none" />
-        </div>
-        <div v-else class="space-y-2 mt-8">
-          <Skeleton class="w-36 h-12 mb-8" />
-          <Skeleton class="h-8 w-full" />
-          <Skeleton class="h-4 w-full" />
-          <Skeleton class="h-24 w-full" />
-          <Skeleton class="flex-1 w-full" />
-        </div>
+    <div class="flex-0 justify-center h-full min-w-2xl max-w-2xl mt-8 mb-0 overflow-y-scroll">
+      <div v-if="editor" class="h-full">
+        <editor-content :editor="editor" class="h-full overflow-y-scroll pt-8 flex-grow max-w-none" />
       </div>
-      <!--<div class="flex-1 max-w-1/4 bg-altbackground border-l border-altborder ml-4 py-16 px-4">
+      <div v-else class="space-y-2 mt-8">
+        <Skeleton class="w-36 h-12 mb-8" />
+        <Skeleton class="h-8 w-full" />
+        <Skeleton class="h-4 w-full" />
+        <Skeleton class="h-24 w-full" />
+        <Skeleton class="flex-1 w-full" />
+      </div>
+    </div>
+    <!--<div class="flex-1 max-w-1/4 bg-altbackground border-l border-altborder ml-4 py-16 px-4">
           <div>asdf</div>
         </div>
         -->
-    </div>
   </div>
 </template>
 

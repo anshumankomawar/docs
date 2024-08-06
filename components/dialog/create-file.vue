@@ -1,46 +1,43 @@
 <script setup lang="ts">
 import { ChevronLeftIcon, DocumentIcon } from '@heroicons/vue/24/outline';
-import { collection, query, where, addDoc } from 'firebase/firestore'
 import { useFocus } from '@vueuse/core'
-import { ref as storageRef, uploadString } from 'firebase/storage'
 
 const emits = defineEmits(['created-file', 'back-clicked'])
 
-const user = useCurrentUser()
-const db = useFirestore()
-const storage = useFirebaseStorage()
+const user = useSupabaseUser()
 const fileTreeStore = useFileTreeStore()
 const tags = ref([])
 const path = ref<string>('')
 const name = ref<string>('')
-
-const folderQuery = computed(() => {
-  if (!user.value) return null;
-  return query(
-    collection(db, 'users', user.value.uid, 'folders'),
-    where('path', '==', path.value)
-  );
-});
-
-const folders = useCollection(folderQuery);
+const client = useSupabaseClient()
 
 const createFile = async () => {
-  if (!user.value) return;
   try {
-    const folderData = folders.value[0];
-    const docRef = await addDoc(collection(db, 'users', user.value.uid, 'files'), {
+    await client.from('inodes').insert({
+      path: `${path.value}${name.value}`,
       name: name.value,
-      parentId: folderData.id,
-      path: `${path.value}/${name.value}`,
+      parent_path: fileTreeStore.selectedInode.id,
+      user_id: user.value.id,
+      resource_type: 'file',
     });
-
-    const newFileRef = storageRef(storage, `${user.value.uid}/${docRef.id}`);
-    await uploadString(newFileRef, '<h1>Hello World</h1>');
-    emits('created-file');
-    console.log('Finished creating file...');
   } catch (error) {
-    console.error('Error writing document: ', error);
+    console.error('Error creating file: ', error);
+    return;
   }
+
+  try {
+    await client.from('versions').insert({
+      inode_path: `${path.value}${name.value}`,
+      content: '',
+      version_number: 0,
+      user_id: user.value.id,
+    })
+  } catch (error) {
+    console.error('Error creating version: ', error);
+    return;
+  }
+
+  emits('created-file');
 }
 
 const filenameInput = ref(null);
@@ -68,7 +65,7 @@ onMounted(() => {
   <div class="px-2 space-y-4 overflow-y-scroll">
     <div class="grid items-center gap-1.5 ">
       <Label for="email" class="text-xs ml-1">Path</Label>
-      <Input id="path" class="border-altborder bg-background" v-model="path" type="email" placeholder="/" />
+      <Input id="path" class="border-altborder bg-background" v-model="path" type="email" placeholder="/" disabled />
     </div>
     <div class="grid items-center gap-1.5 ">
       <Label for="email" class="text-xs ml-1">File Name</Label>
