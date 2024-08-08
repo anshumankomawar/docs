@@ -4,14 +4,12 @@ import { GithubLogoIcon } from '@radix-icons/vue';
 const supabase = useSupabaseClient();
 const config = useRuntimeConfig();
 
-const redirectTo = `http://${config.public.url}/confirm`
-
 async function signInWithProvider(provider: any) {
   try {
     const { error } = await supabase.auth.signInWithOAuth(
       {
         provider,
-        options: { redirectTo },
+        options: { redirectTo: config.public.url + '/confirm' },
       },
     )
     if (error) throw error
