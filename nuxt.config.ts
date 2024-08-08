@@ -1,8 +1,8 @@
 export default defineNuxtConfig({
 	runtimeConfig: {
 		public: {
-			url: process.env.VERCEL_PROJECT_PRODUCTION_URL
-				? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+			url: process.env.NUXT_ENV_VERCEL_URL
+				? `https://${process.env.NUXT_ENV_VERCEL_URL}`
 				: "http://localhost:3000",
 		},
 	},

@@ -26,3 +26,5 @@ logs
 service-account.json
 
 docs-api/
+.vercel
+.env*.local
