@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { GithubLogoIcon } from '@radix-icons/vue';
+
 const supabase = useSupabaseClient();
-const redirectTo = `http://${useRequestURL().host}/confirm`
+const config = useRuntimeConfig();
+
+const redirectTo = `http://${config.public.url}/confirm`
 
 async function signInWithProvider(provider: any) {
   try {

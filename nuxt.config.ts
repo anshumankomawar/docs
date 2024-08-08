@@ -1,4 +1,9 @@
 export default defineNuxtConfig({
+	runtimeConfig: {
+		public: {
+			url: process.env.VERCEL_URL,
+		},
+	},
 	devtools: { enabled: true },
 	modules: [
 		"@nuxtjs/tailwindcss",
