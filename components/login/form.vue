@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { GithubLogoIcon } from '@radix-icons/vue';
 const supabase = useSupabaseClient();
-const redirectTo = `${process.env.NUXT_ENV_VERCEL_URL}/confirm`
+const redirectTo = `http://${useRequestURL().host}/confirm`
 
 async function signInWithProvider(provider: any) {
   try {
